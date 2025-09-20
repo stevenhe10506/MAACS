@@ -15,7 +15,8 @@ Read in the data with `read_csv()` and store the data as an R object named `data
 
 ```{r}
 ## Load the data and any necessary packages here.
-
+dataset <- read.csv("C:\\Users\\test\\MAACS\\maacs.csv.gz")
+head(dataset)
 ```
 
 ## Part 1
@@ -32,7 +33,17 @@ NOTE: For this part, do not use any plots.
 
 ```{r}
 ## Write your function here
-
+fev1valuescheck <- function(dataset){
+  datesetordered <- dataset[order(dataset$age), ]
+  for (i in 2:nrow(datesetordered)){
+    if (datesetordered$fev1[i] < datesetordered$fev1[i-1]){
+      return(FALSE)
+    }
+  }
+  return(TRUE)
+}
+result <- fev1valuescheck(dataset[!is.na(dataset$age) & !is.na(dataset$fev1), ])
+print(result)
 ```
 
 
@@ -44,13 +55,14 @@ How much does FEV1 change for a 1-year increase in the child's age?
 
 ```{r}
 ## Add your code here
-
+model <- lm(fev1 ~ age, data = dataset)
+summary(model)
 ```
 
 
 Write your data analysis statement interpreting the regression model here:
 
-
+For every age increase of 1, it is predicted that the FEV1 will increase by .171162, so a positive correlation between age and FEV1. It appears to be statistically significant.
 
 ## Part 3
 
@@ -65,16 +77,23 @@ NOTE:
 ```{r}
 ## Add your code here
 
+library(ggplot2)
+ggplot(dataset, aes(x = age, y = fev1)) +
+  geom_point() +  
+  labs(title = "Plot of Age vs FEV1",
+       x = "Age",
+       y = "FEV1") +
+  theme_minimal()
 ```
 
 
 Write the three supporting premise statements here:
 
-1. 
+1. There is a strong positive correlation between age and FEV1
 
-2. 
+2. The correlation between age and FEV1 is statistically significant. 
 
-3. 
+3. gender is also correlated with the FEV1 score of a person.
 
 
 ## Part 4
@@ -90,19 +109,42 @@ For statements involving plots, instead of returning `TRUE` or `FALSE`, you func
 
 ```{r}
 ## Function for supporting premise statement 1
-
+checkcor <- function(dataset){
+  if (cor(dataset$fev1, dataset$age, use = "complete.obs") < .7){
+    return(FALSE)
+  }
+  return(TRUE)
+}
+checkcor(dataset)
 ```
 
 
 ```{r}
 ## Function for supporting premise statement 2
+checksig <- function(dataset){
+  model <- lm(fev1 ~ age, data = dataset)
+  if(summary(model)$coefficients[2,4] < .05){
+    return(TRUE)
+  }
+  return(FALSE)
+
+}
+checksig(dataset)
 
 ```
 
 
 ```{r}
 ## Function for supporting premise statement 3
-
+plotmouse <- function(dataset){
+  ggplot(dataset, aes(x = age, y = fev1, colour = gender )) +
+  geom_point() +  
+  labs(title = "Plot of Age vs FEV1",
+       x = "Age",
+       y = "FEV1") +
+  theme_minimal()
+}
+plotmouse(dataset)
 ```
 
 Execute each of your function and show that the produce the expected output.
